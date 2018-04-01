@@ -48,7 +48,7 @@ def inference(input_tensor, avg_class, weights1, biases1,
         layer1 = tf.nn.relu(
             tf.matmul(input_tensor, avg_class.average(weights1)) +
             avg_class.average(biases1))
-        return tf.matmul(layer1, avg_class.average(weights2)) +\
+        return tf.matmul(layer1, avg_class.average(weights2)) + \
                avg_class.average(biases2)
 
 """训练模型的过程"""
@@ -58,7 +58,7 @@ def train(mnist):
 
     # 生成隐藏层的参数
     weights1 = tf.Variable(
-        tf.truncated_normal([LAYER1_NODE, OUTPUT_NODE], stddev=0.1))
+        tf.truncated_normal([INPUT_NODE, LAYER1_NODE], stddev=0.1))
     biases1 = tf.Variable(tf.constant(0.1, shape=[LAYER1_NODE]))
 
     # 生成输出层的参数
