@@ -153,14 +153,14 @@ def train(mnist):
         # 通过验证数据来大致判断停止的条件和评判训练的效果.
         validate_feed = {
             x: mnist.validation.images,
-            y_: mnist.validation.lables,
+            y_: mnist.validation.labels,
         }
 
         # 准备测试数据, 在真实应用中, 这部分数据在训练时是不可见的,
         # 这个数据只是作为模型优劣的最后评价标准.
         test_feed = {
             x: mnist.test.images,
-            y_: mnist.test.lables,
+            y_: mnist.test.labels,
         }
 
         # 迭代地训练神经网络.
@@ -180,7 +180,7 @@ def train(mnist):
             sess.run(train_op, feed_dict={x: xs, y_: ys})
 
         # 在训练结束之后, 在测试数据上检测神经网络模型的最终正确率.
-        test_acc = sess.run(accuracy, feed_dic=test_feed)
+        test_acc = sess.run(accuracy, feed_dict=test_feed)
         print("After {} training steps, test accuracy using average"
               "model is {}".format(TRAINING_STEPS, test_acc))
 
