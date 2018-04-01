@@ -126,6 +126,79 @@ def train(mnist):
     # 这里损失函数包含了交叉熵损失和L2正则化损失
     train_step = tf.train.GradientDescentOptimizer(learning_rate)\
                 .minimize(loss, global_step=global_step)
+    # 在训练神经网络模型时, 每过一遍数据既需要通过反向传播来更新神经网络的参数,
+    # 又需要更新每一个参数的滑动平均值, 为了一次完成多个操作,  tensorflow提供了
+    # tf.control_dependencies和tf.group两种机制
+    # 下面的两行程序和
+    # train_op = tf.group(train_step, variable_averages_op) 是等价的.
+    with tf.control_dependencies([train_step, variable_averages_op]):
+        train_op = tf.no_op(name='train')
+
+    # 检验使用了滑动平均模型的神经网络前向传播结果是否正确.
+    # tf.argmax(average_y, 1)计算没一个样例的预测答案
+    # 其中, average_y 是一个batchsize*10的二维数组, 每一行
+    # 表示一个样例的前向传播结果. tf.argmax的第二个参数1 表示
+    # 选取最大值的操作仅在第一个维度中进行, 也就是说, 只在每一行
+    # 选取最大值对应的下标, 于是得到的结果是一个长度为batch的一维数组.
+    # 这个一维数组中的值就表示了没一个样例对应的数字识别结果,
+    # tf.equal判断两个张量的每一维是否相等, 如果相等返回True, 不相等返回False
+    correct_prediction = tf.equal(tf.argmax(average_y, 1), tf.argmax(y_, 1))
+
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+
+    # 初始化对话并开始训练过程
+    with tf.Session() as sess:
+        tf.global_variables_initializer().run()
+        # 准备验证数据, 在真实应用中, 一般会在神经网络训练过程中
+        # 通过验证数据来大致判断停止的条件和评判训练的效果.
+        validate_feed = {
+            x: mnist.validation.images,
+            y_: mnist.validation.lables,
+        }
+
+        # 准备测试数据, 在真实应用中, 这部分数据在训练时是不可见的,
+        # 这个数据只是作为模型优劣的最后评价标准.
+        test_feed = {
+            x: mnist.test.images,
+            y_: mnist.test.lables,
+        }
+
+        # 迭代地训练神经网络.
+        for i in range(TRAINING_STEPS):
+            # 每1000轮输出一次在验证数据集上的测试结果
+            if i % 1000 == 0:
+            # 计算滑动平均模型在验证数据上的结果 , 因为MNIST的数据集比较小,
+            # 所以一次可以处理所有的验证数据, 为了计算方便, 本样例程序没有
+            # 将验证数据划分为更小的batch, 当神经网络模型比较复杂或者验证数据比较大时,
+            # 太大的batch会导致计算时间过长甚至发生内存溢出的错误.
+                validate_acc = sess.run(accuracy , feed_dict=validate_feed)
+                print("After {} training steps, validation accuracy"
+                      "using average model is {}".format(i, validate_acc))
+
+            # 产生这一轮使用的一个batch的训练数据, 并运行训练过程.
+            xs, ys = mnist.train.next_batch(BATCH_SIZE)
+            sess.run(train_op, feed_dict={x: xs, y_: ys})
+
+        # 在训练结束之后, 在测试数据上检测神经网络模型的最终正确率.
+        test_acc = sess.run(accuracy, feed_dic=test_feed)
+        print("After {} training steps, test accuracy using average"
+              "model is {}".format(TRAINING_STEPS, test_acc))
+
+# 主程序入口
+def main(argv=None):
+    # 声明处理MNIST数据集的类, 这个类在初始化的时候会自动下载数据.
+    mnist = input_data.read_data_sets("/home/ma/PycharmProjects/MNIST_data", one_hot=True)
+    train(mnist)
+
+# tensorflow提供一个主程序入口, tf.app.run()会调用上面定义的main函数
+if __name__ == "__main__":
+    tf.app.run()
+
+
+
+
+
+
 
 
 
