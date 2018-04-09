@@ -24,7 +24,8 @@ TRAINING_STEPS = 30000          # 训练的轮数
 MOVING_AVERAGE_DECAY = 0.99     # 滑动平均衰减率
 
 
-"""一个辅助函数, 给定神经网络的输入和所有参数, 计算神经网络的前向传播结果.
+"""
+一个辅助函数, 给定神经网络的输入和所有参数, 计算神经网络的前向传播结果.
 在这里定义了一个ReLU激活函数的三层全连接神经网咯, 通过加入隐藏层实现了多层网络结构, 
 通过ReLU激活函数实现了去线性化. 在这个函数中也支持传入用于计算参数平均值的类
 """
@@ -51,8 +52,36 @@ def inference(input_tensor, avg_class, weights1, biases1,
         return tf.matmul(layer1, avg_class.average(weights2)) + \
                avg_class.average(biases2)
 
+"""使用tf.variable_scope函数优化"""
+def inference_improved(input_tensor, reuse = False):
+    # 定义第一层神经网络的变量和前向传播过程.
+    with tf.variable_scope('layer1', reuse = reuse):
+        # 根据传进来的reuse来判断是创建新变量还是使用已经创建好的,
+        # 在第一次构造网络时需要创建新的变量, 以后每次调用这个函数
+        # 都直接使用reuse = True就不需要每次将变量传进来了.
+        weights = tf.get_variable("weights", [INPUT_NODE, LAYER1_NODE],
+                                  initializer=tf.truncated_normal_initializer(stddev=0.1))
+        biases = tf.get_variable("biases", [LAYER1_NODE],
+                                 initializer=tf.constant_initializer(0.0))
+        layer1 = tf.nn.relu(tf.matmul(input_tensor, weights) + biases)
+
+    # 类似的定义第二层神经网络的变量和前向传播过程
+    with tf.variable_scope('layer2', reuse=reuse):
+        weights = tf.get_variable("weights", [LAYER1_NODE, OUTPUT_NODE],
+                                  initializer=tf.truncated_normal_initializer(stddev=0.1))
+        biases = tf.get_variable("biases", [OUTPUT_NODE],
+                                 initializer=tf.constant_initializer(0.0))
+        layer2 = tf.matmul(layer1, weights) + biases
+
+    return layer2
+
 """训练模型的过程"""
 def train(mnist):
+
+    '''
+    x = tf.placeholder(tf.float32, [None, INPUT_NODE], name='x-input')
+    y = inference_improved(x)
+    '''
     x = tf.placeholder(tf.float32, [None, INPUT_NODE], name='x-input')
     y_ = tf.placeholder(tf.float32, [None, OUTPUT_NODE], name='y-input')
 
