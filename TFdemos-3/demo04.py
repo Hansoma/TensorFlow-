@@ -1,5 +1,6 @@
 import tensorflow as tf
 
+'''介绍TensorFlow的变量管理'''
 v1 = tf.get_variable("v1", [1])
 print(v1.name) # 输出v1:0 表示了这个变量是生成变量这个运算的地一个结果
 
