@@ -1,5 +1,5 @@
 import time
-import tensorflow as tf 
+import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 
 # 加载mnist_inference.py 和 minst_train.py中定义的常量和函数
@@ -20,10 +20,10 @@ def evaluate(mnist):
         y_ = tf.placeholder(
             tf.float32, [None, mnist_inference.OUTPUT_NODE], name='y-input'
         )
-        validate_feed = {x: mnist.validation.images, 
+        validate_feed = {x: mnist.validation.images,
                         y_: mnist.validation.labels}
 
-        # 直接通过封装好的函数来计算前向传播的结果. 因为测试时不关注正则化损失的值, 
+        # 直接通过封装好的函数来计算前向传播的结果. 因为测试时不关注正则化损失的值,
         # 所以这里用于计算正则化损失的函数被设置为None
         y = mnist_inference.inference(x, None)
 
@@ -53,7 +53,7 @@ def evaluate(mnist):
                     # 通过文件名得到模型保存时的迭代轮数
                     global_step = ckpt.model_checkpoint_path.split('/')[-1]\
                                 .split('-')[-1]
-                    accuracy_score = sess.run(accuracy, 
+                    accuracy_score = sess.run(accuracy,
                                 feed_dict=validate_feed
                     )
                     print("After {} training steps, validation"
@@ -61,7 +61,7 @@ def evaluate(mnist):
                     )
                 else:
                     print("No checkpoint file found")
-                    return 
+                    return
 
             time.sleep(EVAL_INTERVAL_SECS)
 
@@ -71,4 +71,19 @@ def main(argv=None):
 
 if __name__ == "__main__":
     tf.app.run()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
