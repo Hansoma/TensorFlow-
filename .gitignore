@@ -1,5 +1,7 @@
 mnist_models/
 model/
+mnist_models
+model
 .idea
 .idea/
 .project
