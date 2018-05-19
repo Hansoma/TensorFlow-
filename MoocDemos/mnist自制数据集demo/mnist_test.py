@@ -4,7 +4,9 @@ import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 import mnist_forward
 import mnist_backward
+import mnist_generateds #1
 TEST_INTERVAL_SECS = 5
+TEST_NUM = 10000 #2 手动指定测试数据量
 
 def test(mnist):
     with tf.Graph().as_default() as g:
@@ -19,22 +21,36 @@ def test(mnist):
         correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))		
 
+        img_batch, label_batch = mnist_generateds.get_tfRecord(TEST_NUM, isTrain=False) #3 读取测试数据集
+
+
         while True:
             with tf.Session() as sess:
                 ckpt = tf.train.get_checkpoint_state(mnist_backward.MODEL_SAVE_PATH)
                 if ckpt and ckpt.model_checkpoint_path:
                     saver.restore(sess, ckpt.model_checkpoint_path)
                     global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
+                    
+                    #4 线程协调器
+                    coord = tf.train.Coordinator()
+                    threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+                    xs, ys = sess.run([img_batch, label_batch]) #5 批获取图片和标签
+                    
                     accuracy_score = sess.run(accuracy, feed_dict={x: mnist.test.images, y_: mnist.test.labels})
                     print("After %s training step(s), test accuracy = %g" % (global_step, accuracy_score))
+
+                    #4 关闭线程协调器
+                    coord.request_stop()
+                    coord.join(threads)
                 else:
                     print('No checkpoint file found')
                     return
             time.sleep(TEST_INTERVAL_SECS)
 
 def main():
-    mnist = input_data.read_data_sets("./data/", one_hot=True)
-    test(mnist)
-
+    # mnist = input_data.read_data_sets("./data/", one_hot=True)
+    # test(mnist)
+    #6 
+    test()
 if __name__ == '__main__':
     main()

@@ -2,6 +2,7 @@ import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 import mnist_forward
 import os
+import mnist_generateds #1
 
 BATCH_SIZE = 200
 LEARNING_RATE_BASE = 0.1
@@ -11,6 +12,7 @@ STEPS = 50000
 MOVING_AVERAGE_DECAY = 0.99
 MODEL_SAVE_PATH="/home/ma/PycharmProjects/TensorFlow-LearningLog/mnist_models"
 MODEL_NAME="mnist_model"
+train_num_examples = 60000 #2 之前直接在下面的地方调用mnist.train.num_examples
 
 
 def backward(mnist):
@@ -27,7 +29,7 @@ def backward(mnist):
     learning_rate = tf.train.exponential_decay(
         LEARNING_RATE_BASE,
         global_step,
-        mnist.train.num_examples / BATCH_SIZE, 
+        train_num_examples / BATCH_SIZE, #3 这里使用自己给出的样本数 
         LEARNING_RATE_DECAY,
         staircase=True)
 
@@ -39,6 +41,8 @@ def backward(mnist):
         train_op = tf.no_op(name='train')
 
     saver = tf.train.Saver()
+    img_batch, label_batch = mnist_generateds.get_tfRecord(BATCH_SIZE, isTrain=False) #4
+
 
     with tf.Session() as sess:
         init_op = tf.global_variables_initializer()
@@ -48,13 +52,20 @@ def backward(mnist):
         if ckpt and ckpt.model_checkpoint_path:
             saver.restore(sess, ckpt.model_checkpoint_path)
 
+        #5 设置多线程协调器, 加快读取速度
+        coord = tf.train.Coordinator()
+        threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+
         for i in range(STEPS):
-            xs, ys = mnist.train.next_batch(BATCH_SIZE)
+            xs, ys = sess.run([img_batch, label_batch]) #6 图片和标签的批获取操作
             _, loss_value, step = sess.run([train_op, loss, global_step], feed_dict={x: xs, y_: ys})
             if i % 1000 == 0:
                 print("After %d training step(s), loss on training batch is %g." % (step, loss_value))
                 saver.save(sess, os.path.join(MODEL_SAVE_PATH, MODEL_NAME), global_step=global_step)
 
+        #5 关闭线程协调器
+        coord.request_stop()
+        coord.join(threads)
 
 def main():
     mnist = input_data.read_data_sets("/home/ma/PycharmProjects/MNIST_data", one_hot=True)
