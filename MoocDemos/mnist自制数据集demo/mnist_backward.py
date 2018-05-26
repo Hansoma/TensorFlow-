@@ -10,7 +10,7 @@ LEARNING_RATE_DECAY = 0.99
 REGULARIZER = 0.0001
 STEPS = 50000
 MOVING_AVERAGE_DECAY = 0.99
-MODEL_SAVE_PATH="/home/ma/PycharmProjects/TensorFlow-LearningLog/mnist_models"
+MODEL_SAVE_PATH="/home/ma/PycharmProjects/MNIST_models"
 MODEL_NAME="mnist_model"
 train_num_examples = 60000 #2 之前直接在下面的地方调用mnist.train.num_examples
 

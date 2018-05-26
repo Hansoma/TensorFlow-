@@ -20,7 +20,7 @@ def get_bias(shape):
 
 def conv2d(x, w):
     """卷积函数"""
-    return tf.nn.conv2d(x, w, strides=[1,1,1,1], padding="SAME")
+    return tf.nn.conv2d(x, w, strides=[1, 1, 1, 1], padding="SAME")
 
 def max_pool_2x2(x):
     """池化函数
@@ -31,10 +31,10 @@ def max_pool_2x2(x):
 def forward(x, train, regularizer):
     # 初始化第一层卷积核
     conv1_w = get_weight(
-        shape=[CONV1_SIZE, CONV1_SIZE, NUM_CHANNELS, CONV1_KERNEL_NUM],
-        regularizer=regularizer)
+        [CONV1_SIZE, CONV1_SIZE, NUM_CHANNELS, CONV1_KERNEL_NUM],
+        regularizer)
     # 初始化第一层偏置
-    conv1_b = get_bias(shape=[CONV1_KERNEL_NUM])
+    conv1_b = get_bias([CONV1_KERNEL_NUM])
     # 卷积计算, 卷积核是初始化的conv1_w
     conv1 = conv2d(x, conv1_w)
     # 对 conv1 偏置激活
@@ -44,8 +44,8 @@ def forward(x, train, regularizer):
 
     # 第二层卷积核的深度等于上一层卷积核的个数, 即 CONV1_KERNEL_NUM
     conv2_w = get_weight(
-        shape=[CONV2_SIZE, CONV2_SIZE, CONV1_KERNEL_NUM, CONV2_KERNEL_NUM],
-        regularizer=regularizer)
+        [CONV2_SIZE, CONV2_SIZE, CONV1_KERNEL_NUM, CONV2_KERNEL_NUM],
+        regularizer)
     # 初始化第二层的偏置
     conv2_b = get_bias([CONV2_KERNEL_NUM])
     # 卷积计算, 第二层的输入是第一层的输出, 即pool1

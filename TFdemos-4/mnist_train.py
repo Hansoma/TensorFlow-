@@ -16,7 +16,7 @@ TRAINING_STEPS = 30000
 MOVING_AVERAGE_DECAY = 0.99
 
 # 模型保存的路径
-MODEL_SAVE_PATH = "/home/ma/PycharmProjects/TensorFlow-LearningLog/mnist_models/"
+MODEL_SAVE_PATH = "/home/ma/PycharmProjects/MNIST_models/"
 MODEL_NAME = "model.ckpt"
 
 def train(mnist):

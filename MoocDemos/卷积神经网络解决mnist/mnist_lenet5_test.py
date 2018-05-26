@@ -11,13 +11,14 @@ TEST_INTERVAL_SECS = 5
 def test(mnist):
     with tf.Graph().as_default() as g: 
         # 与之前类似的处理
-        x = tf.placeholder(tf.float32,[
+        x = tf.placeholder(tf.float32, [
             mnist.test.num_examples,
             mnist_lenet5_forward.IMAGE_SIZE,
             mnist_lenet5_forward.IMAGE_SIZE,
-            mnist_lenet5_forward.NUM_CHANNELS]) 
+            mnist_lenet5_forward.NUM_CHANNELS])
+
         y_ = tf.placeholder(tf.float32, [None, mnist_lenet5_forward.OUTPUT_NODE])
-        y = mnist_lenet5_forward.forward(x,False,None)
+        y = mnist_lenet5_forward.forward(x, False, None)
 
         ema = tf.train.ExponentialMovingAverage(mnist_lenet5_backward.MOVING_AVERAGE_DECAY)
         ema_restore = ema.variables_to_restore()
@@ -33,11 +34,11 @@ def test(mnist):
                     saver.restore(sess, ckpt.model_checkpoint_path)
 					
                     global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1] 
-                    reshaped_x = np.reshape(mnist.test.images,(
-                    mnist.test.num_examples,
-        	        mnist_lenet5_forward.IMAGE_SIZE,
-        	        mnist_lenet5_forward.IMAGE_SIZE,
-        	        mnist_lenet5_forward.NUM_CHANNELS))
+                    reshaped_x = np.reshape(mnist.test.images, (
+                        mnist.test.num_examples,
+                        mnist_lenet5_forward.IMAGE_SIZE,
+                        mnist_lenet5_forward.IMAGE_SIZE,
+                        mnist_lenet5_forward.NUM_CHANNELS))
                     accuracy_score = sess.run(accuracy, feed_dict={x:reshaped_x,y_:mnist.test.labels}) 
                     print("After %s training step(s), test accuracy = %g" % (global_step, accuracy_score))
                 else:
