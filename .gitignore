@@ -16,3 +16,4 @@ model
 *.html
 *.xlm
 *.vscode/
+MoocDemos/vgg/vgg16.npy
